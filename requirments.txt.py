@@ -7,7 +7,7 @@ from pathlib import Path
 st.set_page_config(page_title="Gym Weekly Muscle Work Analyzer", page_icon="💪", layout="centered")
 
 st.title("💪 Gym Weekly Muscle Work Analyzer")
-st.write("Track which **muscle groups** you trained and **how much** work you did each week.")
+st.write("Track which muscle groups you trained and how much work you did each week.")
 
 DATA_PATH = Path("workouts.csv")
 
@@ -72,19 +72,19 @@ with st.expander("➕ Add Workout Entry", expanded=True):
     with col3:
         weight = st.number_input("Weight (kg)", min_value=0.0, max_value=500.0, value=0.0, step=0.5)
 
-    if st.button("Save Entry"):
-        mg = EXERCISE_DB.get(ex, "Other")
-        vol = compute_volume(int(sets), int(reps), float(weight))
-        entry = {
-            "date": pd.to_datetime(d),
-            "exercise": ex,
-            "muscle_group": mg,
-            "sets": int(sets),
-            "reps": int(reps),
-            "weight": float(weight),
-            "volume": float(vol),
-        }
-        df = save_entry(entry)
+    if st.button("Save Entry"):  
+        mg = EXERCISE_DB.get(ex, "Other")  
+        vol = compute_volume(int(sets), int(reps), float(weight))  
+        entry = {  
+            "date": pd.to_datetime(d),  
+            "exercise": ex,  
+            "muscle_group": mg,  
+            "sets": int(sets),  
+            "reps": int(reps),  
+            "weight": float(weight),  
+            "volume": float(vol),  
+        }  
+        df = save_entry(entry)  
         st.success(f"Saved: {ex} on {d} → {mg}, volume={vol:.0f}")
 
 st.divider()
@@ -101,31 +101,31 @@ else:
     mask = (df["date"].dt.date >= start_date) & (df["date"].dt.date <= end_date)
     wdf = df.loc[mask].copy()
 
-    if wdf.empty:
-        st.warning("No entries in the selected date range.")
-    else:
-        agg = wdf.groupby("muscle_group", as_index=False)["volume"].sum()
-        agg["muscle_group"] = pd.Categorical(agg["muscle_group"], categories=MUSCLE_ORDER, ordered=True)
-        agg = agg.sort_values("muscle_group")
+    if wdf.empty:  
+        st.warning("No entries in the selected date range.")  
+    else:  
+        agg = wdf.groupby("muscle_group", as_index=False)["volume"].sum()  
+        agg["muscle_group"] = pd.Categorical(agg["muscle_group"], categories=MUSCLE_ORDER, ordered=True)  
+        agg = agg.sort_values("muscle_group")  
 
-        st.write("**Total Volume by Muscle Group**")
-        st.dataframe(agg)
+        st.write("**Total Volume by Muscle Group**")  
+        st.dataframe(agg)  
 
-        # Plot bar chart
-        fig, ax = plt.subplots()
-        ax.bar(agg["muscle_group"].astype(str), agg["volume"])
-        ax.set_xlabel("Muscle Group")
-        ax.set_ylabel("Weekly Volume (sets × reps × weight)")
-        ax.set_title("Weekly Muscle Work Distribution")
-        st.pyplot(fig)
+        # Plot bar chart  
+        fig, ax = plt.subplots()  
+        ax.bar(agg["muscle_group"].astype(str), agg["volume"])  
+        ax.set_xlabel("Muscle Group")  
+        ax.set_ylabel("Weekly Volume (sets × reps × weight)")  
+        ax.set_title("Weekly Muscle Work Distribution")  
+        st.pyplot(fig)  
 
-        # Suggestions
-        max_vol = agg["volume"].max()
-        threshold = 0.2 * max_vol if max_vol > 0 else 0
-        neglected = agg[agg["volume"] < threshold]["muscle_group"].astype(str).tolist()
+        # Suggestions  
+        max_vol = agg["volume"].max()  
+        threshold = 0.2 * max_vol if max_vol > 0 else 0  
+        neglected = agg[agg["volume"] < threshold]["muscle_group"].astype(str).tolist()  
 
-        st.subheader("🤖 Smart Suggestions")
-        if len(neglected) == 0:
-            st.success("Great balance! No muscle group looks neglected this week.")
-        else:
-            st.warning("You might be neglecting: **" + ", ".join(neglected) + "**")
+        st.subheader("🤖 Smart Suggestions")  
+        if len(neglected) == 0:  
+            st.success("Great balance! No muscle group looks neglected this week.")  
+        else:  
+            st.warning("You might be neglecting: **" + ", ".join(neglected) + "**")  
